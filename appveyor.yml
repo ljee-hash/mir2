@@ -13,20 +13,44 @@ configuration:
 
 before_build:
   - cmd: dotnet --info
-  - cmd: dotnet restore "Legend of Mir.sln"
+  # PatcherWebSite is a legacy ASP.NET Website project (.NETFramework v4.8) that
+  # only the Framework MSBuild can compile — dotnet CLI can't. mir2.slnf includes
+  # only the .NET SDK projects so `dotnet` doesn't trip over it.
+  - cmd: dotnet restore mir2.slnf
 
 build_script:
-  - cmd: dotnet build "Legend of Mir.sln" -c %CONFIGURATION% --no-restore
+  - cmd: dotnet build mir2.slnf -c %CONFIGURATION% --no-restore
 
+# Stage each subsystem into dist\<role>\ then archive one .7z per role.
+# BaseOutputPath from the csprojs sends most outputs under Build\;
+# AutoPatcherAdmin* have no BaseOutputPath so we pull them from their own bin\.
 after_build:
-  # Real binaries live under Build\ (per each csproj's BaseOutputPath).
-  # Package the compiled output, NOT the source tree.
   - cmd: if not exist Build (echo Build directory missing && exit 1)
-  - cmd: 7z a -r "mir2_%CONFIGURATION%_%APPVEYOR_BUILD_NUMBER%.7z" Build
+
+  - cmd: mkdir dist
+  - cmd: mkdir dist\Client
+  - cmd: mkdir dist\Server
+  - cmd: mkdir "dist\ServerTools"
+  - cmd: mkdir dist\Patcher
+
+  - cmd: xcopy /E /I /Y "Build\Client\%CONFIGURATION%\*"                       dist\Client\
+  - cmd: xcopy /E /I /Y "Build\Server\%CONFIGURATION%\*"                       dist\Server\
+  - cmd: xcopy /E /I /Y "Build\Server Tools\LibraryEditor\%CONFIGURATION%\*"   "dist\ServerTools\LibraryEditor\"
+  - cmd: xcopy /E /I /Y "Build\Server Tools\LibraryViewer\%CONFIGURATION%\*"   "dist\ServerTools\LibraryViewer\"
+  - cmd: xcopy /E /I /Y "AutoPatcherAdmin\bin\%CONFIGURATION%\*"               dist\Patcher\AutoPatcherAdmin\
+  - cmd: xcopy /E /I /Y "AutoPatcherAdminV2\bin\%CONFIGURATION%\*"             dist\Patcher\AutoPatcherAdminV2\
+
+  - cmd: cd dist && 7z a -r "..\mir2-Client-%APPVEYOR_BUILD_NUMBER%.7z"      Client\*
+  - cmd: cd dist && 7z a -r "..\mir2-Server-%APPVEYOR_BUILD_NUMBER%.7z"      Server\*
+  - cmd: cd dist && 7z a -r "..\mir2-ServerTools-%APPVEYOR_BUILD_NUMBER%.7z" ServerTools\*
+  - cmd: cd dist && 7z a -r "..\mir2-Patcher-%APPVEYOR_BUILD_NUMBER%.7z"     Patcher\*
 
 artifacts:
-  - path: mir2_$(CONFIGURATION)_$(APPVEYOR_BUILD_NUMBER).7z
-    name: mir2-binaries
-  - path: Build
-    name: mir2-build-tree
-    type: zip
+  - path: mir2-Client-$(APPVEYOR_BUILD_NUMBER).7z
+    name: mir2-Client
+  - path: mir2-Server-$(APPVEYOR_BUILD_NUMBER).7z
+    name: mir2-Server
+  - path: mir2-ServerTools-$(APPVEYOR_BUILD_NUMBER).7z
+    name: mir2-ServerTools
+  - path: mir2-Patcher-$(APPVEYOR_BUILD_NUMBER).7z
+    name: mir2-Patcher
