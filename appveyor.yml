@@ -21,7 +21,7 @@ before_build:
 build_script:
   - cmd: dotnet build mir2.slnf -c %CONFIGURATION% --no-restore
 
-# Stage each subsystem into dist\<role>\ then archive one .7z per role.
+# Stage each subsystem into dist\<role>\ then archive one .zip per role.
 # BaseOutputPath from the csprojs sends most outputs under Build\;
 # AutoPatcherAdmin* have no BaseOutputPath so we pull them from their own bin\.
 after_build:
@@ -40,17 +40,17 @@ after_build:
   - cmd: xcopy /E /I /Y "AutoPatcherAdmin\bin\%CONFIGURATION%\*"               dist\Patcher\AutoPatcherAdmin\
   - cmd: xcopy /E /I /Y "AutoPatcherAdminV2\bin\%CONFIGURATION%\*"             dist\Patcher\AutoPatcherAdminV2\
 
-  - cmd: pushd dist && 7z a -r "..\mir2-Client-%APPVEYOR_BUILD_NUMBER%.7z"      Client\*      && popd
-  - cmd: pushd dist && 7z a -r "..\mir2-Server-%APPVEYOR_BUILD_NUMBER%.7z"      Server\*      && popd
-  - cmd: pushd dist && 7z a -r "..\mir2-ServerTools-%APPVEYOR_BUILD_NUMBER%.7z" ServerTools\* && popd
-  - cmd: pushd dist && 7z a -r "..\mir2-Patcher-%APPVEYOR_BUILD_NUMBER%.7z"     Patcher\*     && popd
+  - cmd: pushd dist && 7z a -tzip -r "..\mir2-Client-%APPVEYOR_BUILD_NUMBER%.zip"      Client\*      && popd
+  - cmd: pushd dist && 7z a -tzip -r "..\mir2-Server-%APPVEYOR_BUILD_NUMBER%.zip"      Server\*      && popd
+  - cmd: pushd dist && 7z a -tzip -r "..\mir2-ServerTools-%APPVEYOR_BUILD_NUMBER%.zip" ServerTools\* && popd
+  - cmd: pushd dist && 7z a -tzip -r "..\mir2-Patcher-%APPVEYOR_BUILD_NUMBER%.zip"     Patcher\*     && popd
 
 artifacts:
-  - path: mir2-Client-$(APPVEYOR_BUILD_NUMBER).7z
+  - path: mir2-Client-$(APPVEYOR_BUILD_NUMBER).zip
     name: mir2-Client
-  - path: mir2-Server-$(APPVEYOR_BUILD_NUMBER).7z
+  - path: mir2-Server-$(APPVEYOR_BUILD_NUMBER).zip
     name: mir2-Server
-  - path: mir2-ServerTools-$(APPVEYOR_BUILD_NUMBER).7z
+  - path: mir2-ServerTools-$(APPVEYOR_BUILD_NUMBER).zip
     name: mir2-ServerTools
-  - path: mir2-Patcher-$(APPVEYOR_BUILD_NUMBER).7z
+  - path: mir2-Patcher-$(APPVEYOR_BUILD_NUMBER).zip
     name: mir2-Patcher
