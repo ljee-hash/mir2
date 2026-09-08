@@ -10,7 +10,8 @@
       "AutoPatcherAdminV2\\AutoPatcherAdminV2.csproj",
       "Controls\\FixedListViewControl\\CustomFormControl.csproj",
       "LibraryEditor\\LibraryEditor.csproj",
-      "LibraryViewer\\LibraryViewer.csproj"
+      "LibraryViewer\\LibraryViewer.csproj",
+      "ResourceChecker\\ResourceChecker.csproj"
     ]
   }
 }
