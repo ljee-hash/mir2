@@ -37,6 +37,7 @@ after_build:
   - cmd: xcopy /E /I /Y "Build\Server\%CONFIGURATION%\*"                       dist\Server\
   - cmd: xcopy /E /I /Y "Build\Server Tools\LibraryEditor\%CONFIGURATION%\*"   "dist\ServerTools\LibraryEditor\"
   - cmd: xcopy /E /I /Y "Build\Server Tools\LibraryViewer\%CONFIGURATION%\*"   "dist\ServerTools\LibraryViewer\"
+  - cmd: xcopy /E /I /Y "Build\Server Tools\ResourceChecker\%CONFIGURATION%\*" "dist\ServerTools\ResourceChecker\"
   - cmd: xcopy /E /I /Y "AutoPatcherAdmin\bin\%CONFIGURATION%\*"               dist\Patcher\AutoPatcherAdmin\
   - cmd: xcopy /E /I /Y "AutoPatcherAdminV2\bin\%CONFIGURATION%\*"             dist\Patcher\AutoPatcherAdminV2\
 
