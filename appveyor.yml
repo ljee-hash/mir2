@@ -1,62 +1,32 @@
 version: 1.0.{build}
-clone_depth: 25
+clone_depth: 5
 clone_folder: C:\projects\mir2
 
-image: Visual Studio 2015
+image: Visual Studio 2022
 
 environment:
-  CTEST_OUTPUT_ON_FAILURE: TRUE
-  matrix:
-    - build_system: msbuild
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_NOLOGO: 1
 
 configuration:
   - Debug
-  #- Release
-  
-install:
-  # Retrieve submodules, dependencies are stored there.
-  - git submodule update --init
 
 before_build:
-- del "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets"
-
-build:
-  verbosity: minimal
+  - cmd: dotnet --info
+  - cmd: dotnet restore "Legend of Mir.sln"
 
 build_script:
-  - cd %APPVEYOR_BUILD_FOLDER%
-  - set PATH=%PATH%;
-  # Build
-  - ps: >-
-      if($env:build_system -eq "cmake") {
-        mkdir build;
-        cd build;
-        cmake -G "$env:generator" ..;
-        cmake --build . --config $env:configuration;
-      }
-      elseif($env:build_system -eq "msbuild") {
-        msbuild /p:Configuration=$env:configuration        
-        7z a mir2_1_0_.7z .       
-      }
-  # Package
-  - ps: >-
-      if($env:configuration -eq "Release") {
-        if($env:build_system -eq "cmake") {
-          cpack
-        }
-        elseif($env:build_system -eq "msbuild") {
-          rm Release\mir2-mapeditor\bin\*.lastcodeanalysissucceeded;
-          rm Release\mir2-mapeditor\bin\*.iobj;
-          rm Release\mir2-mapeditor\bin\*.ipdb;
-          rm Release\mir2-mapeditor\bin\*.ilk;
-        }
-      }
-      
-      
+  - cmd: dotnet build "Legend of Mir.sln" -c %CONFIGURATION% --no-restore
+
+after_build:
+  # Real binaries live under Build\ (per each csproj's BaseOutputPath).
+  # Package the compiled output, NOT the source tree.
+  - cmd: if not exist Build (echo Build directory missing && exit 1)
+  - cmd: 7z a -r "mir2_%CONFIGURATION%_%APPVEYOR_BUILD_NUMBER%.7z" Build
+
 artifacts:
-  - path: Release
-    name: mir2-mapeditor
-  - path: Debug
-    name: mir2_1_0_.7z
-  - path: mir2_1_0_.7z
-    name: Graphviz-Windows-install
+  - path: mir2_$(CONFIGURATION)_$(APPVEYOR_BUILD_NUMBER).7z
+    name: mir2-binaries
+  - path: Build
+    name: mir2-build-tree
+    type: zip
