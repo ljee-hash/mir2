@@ -40,10 +40,10 @@ after_build:
   - cmd: xcopy /E /I /Y "AutoPatcherAdmin\bin\%CONFIGURATION%\*"               dist\Patcher\AutoPatcherAdmin\
   - cmd: xcopy /E /I /Y "AutoPatcherAdminV2\bin\%CONFIGURATION%\*"             dist\Patcher\AutoPatcherAdminV2\
 
-  - cmd: cd dist && 7z a -r "..\mir2-Client-%APPVEYOR_BUILD_NUMBER%.7z"      Client\*
-  - cmd: cd dist && 7z a -r "..\mir2-Server-%APPVEYOR_BUILD_NUMBER%.7z"      Server\*
-  - cmd: cd dist && 7z a -r "..\mir2-ServerTools-%APPVEYOR_BUILD_NUMBER%.7z" ServerTools\*
-  - cmd: cd dist && 7z a -r "..\mir2-Patcher-%APPVEYOR_BUILD_NUMBER%.7z"     Patcher\*
+  - cmd: pushd dist && 7z a -r "..\mir2-Client-%APPVEYOR_BUILD_NUMBER%.7z"      Client\*      && popd
+  - cmd: pushd dist && 7z a -r "..\mir2-Server-%APPVEYOR_BUILD_NUMBER%.7z"      Server\*      && popd
+  - cmd: pushd dist && 7z a -r "..\mir2-ServerTools-%APPVEYOR_BUILD_NUMBER%.7z" ServerTools\* && popd
+  - cmd: pushd dist && 7z a -r "..\mir2-Patcher-%APPVEYOR_BUILD_NUMBER%.7z"     Patcher\*     && popd
 
 artifacts:
   - path: mir2-Client-$(APPVEYOR_BUILD_NUMBER).7z
